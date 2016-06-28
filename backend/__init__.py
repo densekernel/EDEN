@@ -30,8 +30,28 @@ class ArticleCount(Resource):
     data = resp.json()
     return data
 
+class ArticleCluster(Resource):
 
+  def get(self):
+    print("Call for : GET /articles/cluster")
+    url = config.es_base_url['articles']+'/_search'
+    query = {
+      "query" : {
+          "match_all" : {},
+      },
+      "size" : 10
+    }
+    resp = requests.post(url, data=json.dumps(query))
+    data = resp.json()
+
+    # documents array
+    articles = data['hits']['hits']
+    
+    
+
+    return articles
 
 
 # API resource routes
 api.add_resource(ArticleCount, config.api_base_url+'/articles/count')
+api.add_resource(ArticleCluster, config.api_base_url+'/articles/cluster')

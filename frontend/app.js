@@ -12,6 +12,12 @@ services
   return $resource(API_base_url+'/articles/count', {}, {
     get: { method: 'GET' }
   });
+})
+.factory('ArticleCluster', function($resource) {
+  console.log(API_base_url+'/articles/cluster');
+  return $resource(API_base_url+'/articles/cluster', {}, {
+    get: { method: 'GET'}
+  })
 });
 
 // Routing/Templating rules
@@ -24,6 +30,10 @@ myApp.config(function($routeProvider) {
   .when('/articles/count', {
     templateUrl: 'pages/article_count.html',
     controller: 'articleCountController'
+  })
+  .when('/articles/cluster', {
+    templateUrl: 'pages/article_cluster.html',
+    controller: 'articleClusterController'
   })
 });
 
@@ -38,5 +48,12 @@ myApp.controller(
   'articleCountController',
   function ($scope, ArticleCount) {
     $scope.articleCount = ArticleCount.get();
+  }
+);
+
+myApp.controller(
+  'articleClusterController',
+  function ($scope, ArticleCluster) {
+    $scope.articles = ArticleCluster.query();
   }
 );

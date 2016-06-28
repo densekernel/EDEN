@@ -33,7 +33,7 @@ The back-end of the application is powered by Python Flask.
 Installation:
 
 + Run ElasticSearch with Signal 1M-Sample (See Elasticsearch section)
-+ Clone repo `git clone https://github.com/jonathanmanfield/EDEN`
++ `git clone https://github.com/jonathanmanfield/EDEN`
 + `cd EDEN`
 + `virtualenv venv`
 + `source ./venv/bin/activate`
@@ -56,8 +56,12 @@ Access (web application):
 + visit `http://localhost:8000`
 + Test count articles by visiting `http://localhost:8000/#/articles/count`
 
+### Notebooks
+
++ Signal Notebook (Contains exploratory insights into dataset format and clustering)
+
 ### Credits
 
 + [Building a Search-As-You-Type Feature with Elasticsearch, AngularJS and Flask](https://marcobonzanini.com/2015/08/10/building-a-search-as-you-type-feature-with-elasticsearch-angularjs-and-flask/)
-+ [Pt 2](https://marcobonzanini.com/2015/08/18/building-a-search-as-you-type-feature-with-elasticsearch-angularjs-and-flask-part-2-front-end/)
++ [Building a search-as-you-type feature with Elasticsearch, AngularJS and Flask (Part 2: front-end)](https://marcobonzanini.com/2015/08/18/building-a-search-as-you-type-feature-with-elasticsearch-angularjs-and-flask-part-2-front-end/)
 
