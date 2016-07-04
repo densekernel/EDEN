@@ -35,7 +35,7 @@
             <a ng-href="{{ article._source['original-url'] }}" target="_blank"><h2>{{article._source.title}}</h2></a>
             <p>{{ article._source.published }}</p>
             <p>{{ article._source.source }} &middot; {{ article._source.author }}</p>
-            <p>{{ article._source.summary }}</p>
+            <p>{{ article._source['signal-entities-text'] }}</p>
           </td>
         </tr>
       </tbody>

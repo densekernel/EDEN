@@ -47,7 +47,19 @@ class ArticleCluster(Resource):
     # documents array
     articles = data['hits']['hits']
     
-    
+    # entity extraction
+    print "Entity extraction"
+    for i, article in enumerate(articles):
+      try:
+        entitites = article['_source']['signal-entities']
+        article['_source']['signal-entities-text'] = " ".join([entity['surface-form'] for entity in entitites])
+      except Exception:
+        print "Exception extracting entities at article: ", i
+        print Exception
+        article['_source']['signal-entities'] = []
+        article['_source']['signal-entities-text'] = ""
+
+    # entity_vectorizer = Tfidf
 
     return articles
 

@@ -1,3 +1,4 @@
+data
 venv
 /notebooks/*.json
 /notebooks/*.gzip
