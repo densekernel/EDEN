@@ -4,7 +4,11 @@
 
 + Open source code to analyse streams of news articles and detect events. Moreover, to detect amalous events, those with a story count or vocabulary representing an outlier based on statistical thresholds.
 
-### Architecture
+### Data Pipeline
+
+Built using `luigi`. Currently under construction.
+
+### Application Architecture
 
 + Python 2.7
 

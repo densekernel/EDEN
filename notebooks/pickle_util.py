@@ -1,4 +1,7 @@
-import pickle
+try:
+   import cPickle as pickle
+except:
+   import pickle
 
 def save_obj(obj, name ):
     with open('../data/'+ name + '.pkl', 'wb') as f:

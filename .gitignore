@@ -1,4 +1,9 @@
 data
+datasets
 venv
 /notebooks/*.json
 /notebooks/*.gzip
+models
+pipeline/io
+pipeline/i
+notes
