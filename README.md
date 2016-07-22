@@ -4,7 +4,7 @@
 
 + Open source code to analyse streams of news articles and detect events. Moreover, to detect anomalous events, those with a story count and (perhaps) change in significant terms representing an outlier based on statistical thresholds.
 
-### Data Pipeline
+## Data Pipeline
 
 Built using `luigi`. Currently under construction.
 
@@ -14,7 +14,9 @@ How to run:
 - with all files: `python eden.py ReadData --local-scheduler --fn [35, 30, 6, 33, 23, 2, 1,
 # 20, 29, 40]`
 
-### Application Architecture
+## Application 
+
+### Architecture
 
 + Python 2.7
 
@@ -66,13 +68,14 @@ Access (web application):
 + visit `http://localhost:8000`
 + Test count articles by visiting `http://localhost:8000/#/articles/count`
 
-### Notebooks
+## Notebooks
 
 + Signal Notebook (Contains exploratory insights into dataset format and clustering)
-+ 
++ GAC (Development of GAC algorithm)
 
-### Credits
+## Credits
 
 + [Building a Search-As-You-Type Feature with Elasticsearch, AngularJS and Flask](https://marcobonzanini.com/2015/08/10/building-a-search-as-you-type-feature-with-elasticsearch-angularjs-and-flask/)
 + [Building a search-as-you-type feature with Elasticsearch, AngularJS and Flask (Part 2: front-end)](https://marcobonzanini.com/2015/08/18/building-a-search-as-you-type-feature-with-elasticsearch-angularjs-and-flask-part-2-front-end/)
++ [SciPy Hierarchical Clustering and Dendrogram Tutorial](https://joernhees.de/blog/2015/08/26/scipy-hierarchical-clustering-and-dendrogram-tutorial/)
 
