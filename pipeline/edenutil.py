@@ -14,6 +14,8 @@ import cPickle as pickle
 # cluster_data imports
 
 from sklearn.cluster import KMeans
+from sklearn.cluster import DBSCAN
+from sklearn.cluster import MeanShift, estimate_bandwidth
 import matplotlib.pyplot as plt
 import numpy as np
 import datetime
@@ -22,9 +24,7 @@ import datetime
 
 import pandas as pd
 
-
-# fn = [35, 30, 6, 33, 23, 2, 1, 20, 29, 40]
-# fn = [35]
+'''Library functions'''
 
 # read_data: stitch together data from various feeds
 
@@ -47,7 +47,7 @@ def preprocess_data(data):
     stories = [doc["_source"]["content"] for doc in data]
     ids = [doc["_id"] for doc in data]
 
-    vect = TfidfVectorizer(use_idf=True)
+    vect = TfidfVectorizer(use_idf=True, norm='l2', sublinear_tf=True)
     vsm = vect.fit_transform(stories)
 
     print "[EDEN I/O -- preprocess_data] VSM shape: ", vsm.shape
@@ -58,16 +58,26 @@ def preprocess_data(data):
 # cluster_data: cluster stories based on similarity
 
 
-def algo_select(algo):
+def algo_select(vsm, algo):
     return {
         'kmeans': KMeans(),
+        'dbscan': DBSCAN(),
+        'meanshift': MeanShift(bandwidth=estimate_bandwidth(vsm.toarray(), n_samples=200))
     }.get(algo, KMeans())
+
+
+def algo_fit(vsm, algo, model):
+    if algo == 'meanshift':
+        return model.fit(vsm.toarray())
+    else:
+        return model.fit(vsm)
 
 
 def cluster_data(vsm, algo='kmeans'):
 
-    model = algo_select(algo)
-    model.fit(vsm)
+    model = algo_select(vsm, algo)
+
+    model = algo_fit(vsm, algo, model)
 
     print "[EDEN I/O -- cluster_data] algo: ", algo
 
@@ -120,7 +130,7 @@ def reduce_and_plot_clusters(X, model, title=""):
 
 def evaluate(fn, ids, model):
     df_label = get_df_label(ids, model)
-    df_eval = get_df_eval(fn, model)
+    df_eval = get_df_eval(fn)
     event_cluster = match_event_cluster(df_label, df_eval)
     return score_event_cluster(df_label, df_eval, event_cluster)
 
@@ -135,7 +145,7 @@ def get_df_label(ids, model):
     return df_label
 
 
-def get_df_eval(fn, model):
+def get_df_eval(fn):
     eval_list = []
     for f in fn.split(','):
         print f
@@ -236,7 +246,6 @@ def score_event_cluster(df_label, df_eval, event_cluster):
     print "- r (recall): ", macro_results['r']
     print "- p (precision): ", macro_results['p']
     print "- f1: ", macro_results['f1']
-
 
     # micro rates
 

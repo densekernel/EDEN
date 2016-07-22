@@ -1,4 +1,4 @@
-# run with a custom --n
+# how to run
 # python eden.py ReadData --local-scheduler
 # with all files
 # python eden.py ReadData --local-scheduler --fn [35, 30, 6, 33, 23, 2, 1,
@@ -40,7 +40,7 @@ class ReadData(luigi.Task):
 
 
 class PreprocessData(luigi.Task):
-    fn = luigi.Parameter(default=[35])
+    fn = luigi.Parameter(default='35')
 
     def requires(self):
         return [ReadData(fn=self.fn)]
@@ -54,8 +54,8 @@ class PreprocessData(luigi.Task):
             pickle.dump(data, fout, pickle.HIGHEST_PROTOCOL)
 
 class ClusterData(luigi.Task):
-    fn = luigi.Parameter(default=[35])
-    algo = luigi.Parameter(default=['kmeans'])
+    fn = luigi.Parameter(default='35')
+    algo = luigi.Parameter(default='kmeans')
 
     def requires(self):
         return [PreprocessData(fn=self.fn)]
@@ -69,11 +69,11 @@ class ClusterData(luigi.Task):
             pickle.dump(model, fout, pickle.HIGHEST_PROTOCOL)
 
 class Evaluate(luigi.Task):
-    fn = luigi.Parameter(default=[35])
-    algo = luigi.Parameter(default=['kmeans'])
+    fn = luigi.Parameter(default='35')
+    algo = luigi.Parameter(default='kmeans')
 
     def requires(self):
-        return [PreprocessData(fn=self.fn), ClusterData(fn=self.fn)]
+        return [PreprocessData(fn=self.fn), ClusterData(fn=self.fn, algo=self.algo)]
 
     def output(self):
         return luigi.LocalTarget(io_dir + "evaluate/evaluate_fn_{}_algo_{}.txt".format(self.fn, self.algo))

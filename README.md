@@ -2,11 +2,17 @@
 
 ## (Anomalous) Event Detection in News
 
-+ Open source code to analyse streams of news articles and detect events. Moreover, to detect amalous events, those with a story count or vocabulary representing an outlier based on statistical thresholds.
++ Open source code to analyse streams of news articles and detect events. Moreover, to detect anomalous events, those with a story count and (perhaps) change in significant terms representing an outlier based on statistical thresholds.
 
 ### Data Pipeline
 
 Built using `luigi`. Currently under construction.
+
+How to run:
+
+- default: `# python eden.py ReadData --local-scheduler`
+- with all files: `python eden.py ReadData --local-scheduler --fn [35, 30, 6, 33, 23, 2, 1,
+# 20, 29, 40]`
 
 ### Application Architecture
 
