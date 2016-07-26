@@ -11,8 +11,7 @@ Built using `luigi`. Currently under construction.
 How to run:
 
 - default: `# python eden.py ReadData --local-scheduler`
-- with all files: `python eden.py ReadData --local-scheduler --fn [35, 30, 6, 33, 23, 2, 1,
-# 20, 29, 40]`
+- with all files: `python eden.py Evaluate --local-scheduler --fn '35,30,6,33,23,2,1,20,29,40'`
 
 ## Application 
 

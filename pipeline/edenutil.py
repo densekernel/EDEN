@@ -1,5 +1,11 @@
 '''Imports'''
 
+# essentials
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
 # read_data imports
 
 import json
@@ -10,23 +16,26 @@ import itertools
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 import cPickle as pickle
+from datetime import datetime
+import time
 
 # cluster_data imports
 
 from sklearn.cluster import KMeans
 from sklearn.cluster import DBSCAN
 from sklearn.cluster import MeanShift, estimate_bandwidth
-import matplotlib.pyplot as plt
-import numpy as np
-import datetime
+from scipy.cluster.hierarchy import cophenet
+from scipy.spatial.distance import pdist
+from scipy.cluster.hierarchy import dendrogram, linkage
+from scipy.cluster.hierarchy import fcluster
 
 # evaluate imports
 
-import pandas as pd
 
 '''Library functions'''
 
 # read_data: stitch together data from various feeds
+
 
 def read_data(fn):
     data = []
@@ -44,45 +53,187 @@ def read_data(fn):
 
 
 def preprocess_data(data):
-    stories = [doc["_source"]["content"] for doc in data]
-    ids = [doc["_id"] for doc in data]
+    # stories = [doc["_source"]["content"] for doc in data]
+    # ids = [doc["_id"] for doc in data]
+
+    def format_entities(norm_ent):
+        ents = []
+        for ent in norm_ent:
+            try:
+                ents.append(ent['surface-form'])
+            except:
+                continue
+        return " ".join(ents)
+
+    d = [{"ids": doc["_id"],
+          "first-published": doc["_source"]["first-published"],
+          "title": doc["_source"]["title"],
+          "summary": doc["_source"]["title"],
+          "content": doc["_source"]["content"],
+          "entities": format_entities(doc["_source"]["normalised-entities"])} for doc in data]
+
+    df_story = pd.DataFrame(d)
+    df_story['first-published-epoch'] = df_story['first-published'].apply(
+        lambda x: int(datetime.strptime(x, "%Y-%m-%dT%H:%M:%SZ").strftime("%s")))
+    df_story = df_story.sort_values(by='first-published-epoch')
 
     vect = TfidfVectorizer(use_idf=True, norm='l2', sublinear_tf=True)
-    vsm = vect.fit_transform(stories)
+    vsm = vect.fit_transform(df_story['content'].values)
+    vsm_arr = vsm.toarray()
 
     print "[EDEN I/O -- preprocess_data] VSM shape: ", vsm.shape
     print "[EDEN I/O -- preprocess_data] VSM type: ", type(vsm)
 
-    return [ids, vsm]
+    df_story['vsm'] = [r for r in vsm_arr]
+
+    return df_story
 
 # cluster_data: cluster stories based on similarity
 
 
 def algo_select(vsm, algo):
+    print "[EDEN I/O -- algo_select] VSM type: ", type(vsm)
     return {
         'kmeans': KMeans(),
         'dbscan': DBSCAN(),
-        'meanshift': MeanShift(bandwidth=estimate_bandwidth(vsm.toarray(), n_samples=200))
+        'meanshift': MeanShift(bandwidth=estimate_bandwidth(vsm, n_samples=200)),
+        'gac': GACModel()
     }.get(algo, KMeans())
 
 
-def algo_fit(vsm, algo, model):
-    if algo == 'meanshift':
-        return model.fit(vsm.toarray())
-    else:
-        return model.fit(vsm)
+def algo_fit(vsm, model):
+    return model.fit(vsm)
 
 
-def cluster_data(vsm, algo='kmeans'):
+# reconsturct vsm: reconstruct np.ndarray from pd.Series
+def recon_vsm(vsm_series):
+    rows = vsm_series.shape[0]
+    cols = vsm_series[0].shape[0]
+    print "[EDEN I/O -- cluster_data] (rows,cols): ", rows, cols
+    vsm = np.zeros((rows, cols))
+
+    for i, r in enumerate(vsm_series):
+        vsm[i] = r
+    return vsm
+
+# GAC Model
+
+
+class GACModel:
+
+    def __init__(self):
+        self.labels_ = []
+
+    # cluster
+    def fit(self, vsm):
+        Z = self.get_linkage_matrix(vsm)
+        n_clus = self.get_cluster_size(vsm, Z)
+        print "[EDEN I/O -- cluster_data] n_clus: ", n_clus
+
+        # ddata = fancy_dendrogram(
+        #     Z,
+        #     truncate_mode='lastp',
+        #     p=58,
+        #     leaf_rotation=90.,
+        #     leaf_font_size=12.,
+        #     show_contracted=True,
+        #     annotate_above=10,
+        #     max_d = 0.62337 # useful in small plots so annotations don't overlap
+        # )
+
+        clusters = fcluster(Z, n_clus, criterion='maxclust')
+
+        print "[EDEN I/O -- cluster_data] clusters: ", clusters
+
+        self.labels_ = clusters
+
+    # GAC utilities
+    def get_linkage_matrix(self, vsm):
+        Z = linkage(vsm, method='average', metric='cosine')
+        c, coph_dists = cophenet(Z, pdist(vsm))
+        print "cophenet test: ", c
+        return Z
+
+    def get_cluster_size(self, vsm, Z):
+        n = vsm.shape[0]
+        for i, z in enumerate(Z):
+            #         print i, z
+            if z[2] > 0.8:
+                print i, ": Min similarity reached"
+                print Z[i]
+                n_clus = n - i
+                break
+            if n * 0.5 == i:
+                print i, ": Max reduction reached"
+                print Z[i]
+                n_clus = n - i
+                break
+
+        return n_clus
+
+# plot: Reduce dimensionality of data and plot with cluster colors
+
+
+def reduce_and_plot_clusters(X, model, title=""):
+    X_reduced = TruncatedSVD().fit_transform(X)
+    X_embedded = TSNE(learning_rate=100).fit_transform(X_reduced)
+
+    n_clus = len(set(model.labels_.tolist()))
+
+    plt.figure(figsize=(10, 10))
+    plt.title(title)
+    plt.scatter(X_embedded[:, 0], X_embedded[:, 1], marker="x",
+                c=model.labels_.tolist(), cmap=plt.cm.get_cmap("prism", n_clus))
+    plt.colorbar(ticks=range(n_clus))
+    plt.clim(-0.5, (n_clus - 0.5))
+    plt.savefig('i/reduce_and_plot_clusters' +
+                str(datetime.datetime.now()) + '.png')
+    plt.show()
+
+
+# plot: Draw a fancy dendrogram
+# https://joernhees.de/blog/2015/08/26/scipy-hierarchical-clustering-and-dendrogram-tutorial/
+def fancy_dendrogram(*args, **kwargs):
+    max_d = kwargs.pop('max_d', None)
+    if max_d and 'color_threshold' not in kwargs:
+        kwargs['color_threshold'] = max_d
+    annotate_above = kwargs.pop('annotate_above', 0)
+
+    ddata = dendrogram(*args, **kwargs)
+
+    if not kwargs.get('no_plot', False):
+        plt.title('Hierarchical Clustering Dendrogram (truncated)')
+        plt.xlabel('sample index or (cluster size)')
+        plt.ylabel('distance')
+        for i, d, c in zip(ddata['icoord'], ddata['dcoord'], ddata['color_list']):
+            x = 0.5 * sum(i[1:3])
+            y = d[1]
+            if y > annotate_above:
+                plt.plot(x, y, 'o', c=c)
+                plt.annotate("%.3g" % y, (x, y), xytext=(0, -5),
+                             textcoords='offset points',
+                             va='top', ha='center')
+        if max_d:
+            plt.axhline(y=max_d, c='k')
+
+    plt.show()
+
+    return ddata
+
+
+def cluster_data(df_story, algo='kmeans'):
+    print "[EDEN I/O -- cluster_data] algo: ", algo
+    # here vsm is dense array (test performance)
+    # maybe add column for csr_matrix as well
+    vsm = recon_vsm(df_story['vsm'])
 
     model = algo_select(vsm, algo)
-
-    model = algo_fit(vsm, algo, model)
-
-    print "[EDEN I/O -- cluster_data] algo: ", algo
+    algo_fit(vsm, model)
 
     # print "[EDEN I/O -- cluster_data.py] plot: cluster counts"
     # plot_cluster_counts(model, "Cluster counts using algorithm: " + str(algo))
+
+    print "[EDEN I/O -- cluster_data] model: ", model
 
     return model
 
@@ -105,7 +256,7 @@ def plot_cluster_counts(model, title=""):
     plt.xlabel('Cluster')
     plt.ylabel('Number of stories')
     plt.savefig('i/plot_cluster_counts' +
-                str(datetime.datetime.now()) + '.png')
+                str(datetime.now()) + '.png')
     plt.show()
 
 
@@ -122,7 +273,7 @@ def reduce_and_plot_clusters(X, model, title=""):
     plt.colorbar(ticks=range(n_clus))
     plt.clim(-0.5, (n_clus - 0.5))
     plt.savefig('i/reduce_and_plot_clusters' +
-                str(datetime.datetime.now()) + '.png')
+                str(datetime.now()) + '.png')
     plt.show()
 
 # evaluate: evaluate performance of clustering data
@@ -233,6 +384,7 @@ def score_event_cluster(df_label, df_eval, event_cluster):
             miss = None
             f = None
             r = None
+            p = None
             f1 = None
 
         df_results.loc[i] = [a, b, c, d, miss, f, r, p, f1]

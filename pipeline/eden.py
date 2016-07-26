@@ -1,8 +1,7 @@
 # how to run
 # python eden.py ReadData --local-scheduler
 # with all files
-# python eden.py ReadData --local-scheduler --fn [35, 30, 6, 33, 23, 2, 1,
-# 20, 29, 40]
+# python eden.py Evaluate --local-scheduler --fn '1,12,2,20,21,23,28,29,30,33,35,40,5,6'
 
 import luigi
 
@@ -65,7 +64,7 @@ class ClusterData(luigi.Task):
 
     def run(self):
         with self.input()[0].open() as fin, self.output().open('wb') as fout:
-            model = edenutil.cluster_data(pickle.load(fin)[1], self.algo)
+            model = edenutil.cluster_data(pickle.load(fin), self.algo)
             pickle.dump(model, fout, pickle.HIGHEST_PROTOCOL)
 
 class Evaluate(luigi.Task):
@@ -83,7 +82,7 @@ class Evaluate(luigi.Task):
         # debug self input type
         # print "SELF INPUT TYPE" type(self.input()[0])
         with self.input()[0].open() as fin_0, self.input()[1].open() as fin_1, self.output().open('w') as fout:
-            ids = pickle.load(fin_0)[0]
+            ids = pickle.load(fin_0)['ids']
             model = pickle.load(fin_1)
             results = edenutil.evaluate(self.fn, ids, model)
             fout.write("Cluster results:\n")
@@ -92,22 +91,6 @@ class Evaluate(luigi.Task):
             fout.write(results[1].to_string()+"\n")
             fout.write("Micro results:\n")
             fout.write(results[2].to_string()+"\n")
-
-# class SquaredNumbers(luigi.Task):
-#     n = luigi.IntParameter(default=10)
-
-#     def requires(self):
-#         return [PrintNumbers(n=self.n)]
-
-#     def output(self):
-#         return luigi.LocalTarget("squares_up_to_{}.txt".format(self.n))
-
-#     def run(self):
-#         with self.input()[0].open() as fin, self.output().open('w') as fout:
-#             for line in fin:
-#                 n = int(line.strip())
-#                 out = n * n
-#                 fout.write("{}:{}\n".format(n, out))
 
 if __name__ == '__main__':
     luigi.run()
