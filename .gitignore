@@ -1,8 +1,9 @@
 data
 datasets
 venv
-/notebooks/*.json
-/notebooks/*.gzip
+notebooks/*.json
+notebooks/*.gzip
+notebooks/i
 models
 pipeline/io
 pipeline/i

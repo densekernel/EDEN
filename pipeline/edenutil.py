@@ -5,6 +5,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 
 # read_data imports
 
@@ -28,6 +29,7 @@ from scipy.cluster.hierarchy import cophenet
 from scipy.spatial.distance import pdist
 from scipy.cluster.hierarchy import dendrogram, linkage
 from scipy.cluster.hierarchy import fcluster
+from sklearn.metrics.pairwise import cosine_similarity
 
 # evaluate imports
 
@@ -76,6 +78,7 @@ def preprocess_data(data):
     df_story['first-published-epoch'] = df_story['first-published'].apply(
         lambda x: int(datetime.strptime(x, "%Y-%m-%dT%H:%M:%SZ").strftime("%s")))
     df_story = df_story.sort_values(by='first-published-epoch')
+    df_story = df_story.reset_index()
 
     vect = TfidfVectorizer(use_idf=True, norm='l2', sublinear_tf=True)
     vsm = vect.fit_transform(df_story['content'].values)
@@ -91,85 +94,226 @@ def preprocess_data(data):
 # cluster_data: cluster stories based on similarity
 
 
-def algo_select(vsm, algo):
-    print "[EDEN I/O -- algo_select] VSM type: ", type(vsm)
-    return {
-        'kmeans': KMeans(),
-        'dbscan': DBSCAN(),
-        'meanshift': MeanShift(bandwidth=estimate_bandwidth(vsm, n_samples=200)),
-        'gac': GACModel()
-    }.get(algo, KMeans())
-
-
-def algo_fit(vsm, model):
-    return model.fit(vsm)
-
-
 # reconsturct vsm: reconstruct np.ndarray from pd.Series
 def recon_vsm(vsm_series):
     rows = vsm_series.shape[0]
     cols = vsm_series[0].shape[0]
-    print "[EDEN I/O -- cluster_data] (rows,cols): ", rows, cols
+    print "[EDEN I/O -- recon_vsm] (rows,cols): ", rows, cols
     vsm = np.zeros((rows, cols))
 
     for i, r in enumerate(vsm_series):
         vsm[i] = r
+
+    # print "[EDEN I/O -- recon_vsm] vsm shape: ", vsm.shape
+    # print "[EDEN I/O -- recon_vsm] vsm type: ", type(vsm)
+    # print "[EDEN I/O -- recon_vsm] vsm[0] type: ", type(vsm[0])
+
     return vsm
 
 # GAC Model
 
 
-class GACModel:
+def mycosine(x1, x2):
+    x1 = x1.reshape(1, -1)
+    x2 = x2.reshape(1, -1)
+    ans = 1 - cosine_similarity(x1, x2)
+    return max(ans[0][0], 0)
 
-    def __init__(self):
+# GAC utilities
+def get_linkage_matrix(vsm):
+    Z = linkage(vsm, method='average', metric=mycosine)
+    c, coph_dists = cophenet(Z, pdist(vsm))
+    print "cophenet test: ", c
+    return Z
+
+def get_cluster_size(vsm, Z):
+    n = vsm.shape[0]
+    for i, z in enumerate(Z):
+        #         print i, z
+        if z[2] > 0.8:
+            print i, ": Min similarity reached"
+            print Z[i]
+            n_clus = n - i
+            break
+        if n * 0.5 == i:
+            print i, ": Max reduction reached"
+            print Z[i]
+            n_clus = n - i
+            break
+
+    return n_clus
+
+def get_cluster_order(Z):
+    cluster_order_dict = {}
+    cluster_order_list = []
+    for i, z in enumerate(Z):
+        # create pairs based on order
+        cluster_order_dict[z[0]] = 2 * i
+        cluster_order_dict[z[1]] = 2 * i + 1
+        # add docs to list
+        cluster_order_list.extend([z[0], z[1]])
+    
+    return [cluster_order_dict, cluster_order_list]
+
+
+class GAC:
+
+    def __init__(self, b = 10.0, p = 0.5, s = 0.2, t = 100, re = 5):
         self.labels_ = []
+        self.b = b
+        self.p = p
+        self.s = s
+        self.t = t
+        self.re = re
 
     # cluster
-    def fit(self, vsm):
-        Z = self.get_linkage_matrix(vsm)
-        n_clus = self.get_cluster_size(vsm, Z)
+    def fit(self, df_story):
+
+        # basic GAC within sub_def
+        # recon vsm
+        vsm = recon_vsm(df_story['vsm'])
+        # 1. linkage
+        Z = get_linkage_matrix(vsm)
+        n_clus = get_cluster_size(vsm, Z)
         print "[EDEN I/O -- cluster_data] n_clus: ", n_clus
-
-        # ddata = fancy_dendrogram(
-        #     Z,
-        #     truncate_mode='lastp',
-        #     p=58,
-        #     leaf_rotation=90.,
-        #     leaf_font_size=12.,
-        #     show_contracted=True,
-        #     annotate_above=10,
-        #     max_d = 0.62337 # useful in small plots so annotations don't overlap
-        # )
-
+        # 2. clusters
         clusters = fcluster(Z, n_clus, criterion='maxclust')
+        df_story['clusters'] = clusters
+        # 3. average centroids and clusters
+        # get clustering order
+        # [cluster_order_dict, cluster_order_list] = get_cluster_order(Z)
+
+        # optional : fancy dendrogram
+        ddata = fancy_dendrogram(
+            Z,
+            truncate_mode='lastp',
+            p=58,
+            leaf_rotation=90.,
+            leaf_font_size=12.,
+            show_contracted=True,
+            annotate_above=10,
+            max_d=0.62337  # useful in small plots so annotations don't overlap
+        )
 
         print "[EDEN I/O -- cluster_data] clusters: ", clusters
 
         self.labels_ = clusters
 
-    # GAC utilities
-    def get_linkage_matrix(self, vsm):
-        Z = linkage(vsm, method='average', metric='cosine')
-        c, coph_dists = cophenet(Z, pdist(vsm))
-        print "cophenet test: ", c
-        return Z
 
-    def get_cluster_size(self, vsm, Z):
-        n = vsm.shape[0]
-        for i, z in enumerate(Z):
-            #         print i, z
-            if z[2] > 0.8:
-                print i, ": Min similarity reached"
-                print Z[i]
-                n_clus = n - i
-                break
-            if n * 0.5 == i:
-                print i, ": Max reduction reached"
-                print Z[i]
-                n_clus = n - i
-                break
+    # creation dictionary and lists of ordering of clustering
+    # from linkage matrix
+    # anatomy of z: z[0] - first doc, z[1] - second doc
+    # returns dict: key - doc, value - order
 
-        return n_clus
+def basic_GAC(df_story):
+    Z = get_linkage_matrix(recon_vsm(df_story['vsm']))
+    n_clus = get_cluster_size(vsm, Z)
+    clusters = fcluster(Z, n_clus, criterion='maxclust')
+    df_story['cluster'] = clusters
+    [cluster_order_dict, cluster_order_list] = get_cluster_order(Z)
+    print len(df_story)
+    df_update = df_story.groupby('cluster').apply(build_centroids).reset_index(drop=True)
+    print len(df_update)
+
+class GACTemporal:
+
+    def __init__(self, b = 10.0, p = 0.5, s = 0.2, t = 100, re = 5):
+        self.labels_ = []
+        self.b = b
+        self.p = p
+        self.s = s
+        self.t = t
+        self.re = re
+
+    # cluster
+    def fit(self, df_story):
+
+        # basic GAC within sub_def
+        # recon vsm
+        vsm = recon_vsm(df_story['vsm'])
+        # 1. linkage
+        Z = get_linkage_matrix(vsm)
+        n_clus = get_cluster_size(vsm, Z)
+        print "[EDEN I/O -- cluster_data] n_clus: ", n_clus
+        # 2. clusters
+        clusters = fcluster(Z, n_clus, criterion='maxclust')
+        df_story['clusters'] = clusters
+        # 3. average centroids and clusters
+        # get clustering order
+        # [cluster_order_dict, cluster_order_list] = get_cluster_order(Z)
+
+        # optional : fancy dendrogram
+        ddata = fancy_dendrogram(
+            Z,
+            truncate_mode='lastp',
+            p=58,
+            leaf_rotation=90.,
+            leaf_font_size=12.,
+            show_contracted=True,
+            annotate_above=10,
+            max_d=0.62337  # useful in small plots so annotations don't overlap
+        )
+
+        print "[EDEN I/O -- cluster_data] clusters: ", clusters
+
+        self.labels_ = clusters
+
+
+    # creation dictionary and lists of ordering of clustering
+    # from linkage matrix
+    # anatomy of z: z[0] - first doc, z[1] - second doc
+    # returns dict: key - doc, value - order
+
+
+def algo_select(algo='kmeans', params={}):
+    print "[EDEN I/O -- algo_select] algo: ", algo
+    print "[EDEN I/O -- algo_select] params: ", params
+    if algo == 'kmeans':
+        return KMeans(**params)
+    elif algo == 'dbscan':
+        return DBSCAN(**params)
+    elif algo == 'meanshift':
+        return MeanShift(**params)
+    elif algo == 'gac':
+        return GAC(**params)
+    elif algo == 'gactemporal':
+        return GACTemporal(**params)
+
+
+def cluster_data(df_story, algo='kmeans'):
+    print "[EDEN I/O -- cluster_data] algo: ", algo
+    # here vsm is dense array (test performance)
+    # maybe add column for csr_matrix as well
+
+    if algo == 'gac':
+        b = max(math.ceil((400.0 / 15836.0) * df_story.shape[0]),10)
+        params = {'b': b,
+                  'p': 0.5,
+                  's': 0.2,
+                  't': 100,
+                  're': 5
+                  }
+        model = algo_select(algo, params)
+        model.fit(df_story)
+
+    elif algo == 'meanshift':
+        vsm = recon_vsm(df_story['vsm'])
+        params = {'bandwidth': estimate_bandwidth(vsm, n_samples=200)}
+        model = algo_select(algo, params)
+        model.fit(vsm)
+    else:
+        vsm = recon_vsm(df_story['vsm'])
+        model = algo_select(algo)
+        model.fit(vsm)
+
+    # print "[EDEN I/O -- cluster_data.py] plot: cluster counts"
+    # plot_cluster_counts(model, "Cluster counts using algorithm: " + str(algo))
+
+    # print "[EDEN I/O -- cluster_data] model: ", model
+
+    return model
+
+# plotting functions for clusters
 
 # plot: Reduce dimensionality of data and plot with cluster colors
 
@@ -221,25 +365,6 @@ def fancy_dendrogram(*args, **kwargs):
     return ddata
 
 
-def cluster_data(df_story, algo='kmeans'):
-    print "[EDEN I/O -- cluster_data] algo: ", algo
-    # here vsm is dense array (test performance)
-    # maybe add column for csr_matrix as well
-    vsm = recon_vsm(df_story['vsm'])
-
-    model = algo_select(vsm, algo)
-    algo_fit(vsm, model)
-
-    # print "[EDEN I/O -- cluster_data.py] plot: cluster counts"
-    # plot_cluster_counts(model, "Cluster counts using algorithm: " + str(algo))
-
-    print "[EDEN I/O -- cluster_data] model: ", model
-
-    return model
-
-# plotting functions for clusters
-
-
 def plot_cluster_counts(model, title=""):
     label_counts = {}
     for label in model.labels_:
@@ -256,23 +381,6 @@ def plot_cluster_counts(model, title=""):
     plt.xlabel('Cluster')
     plt.ylabel('Number of stories')
     plt.savefig('i/plot_cluster_counts' +
-                str(datetime.now()) + '.png')
-    plt.show()
-
-
-def reduce_and_plot_clusters(X, model, title=""):
-    X_reduced = TruncatedSVD().fit_transform(X)
-    X_embedded = TSNE(learning_rate=100).fit_transform(X_reduced)
-
-    n_clus = len(set(model.labels_.tolist()))
-
-    plt.figure(figsize=(10, 10))
-    plt.title(title)
-    plt.scatter(X_embedded[:, 0], X_embedded[:, 1], marker="x",
-                c=model.labels_.tolist(), cmap=plt.cm.get_cmap("jet", n_clus))
-    plt.colorbar(ticks=range(n_clus))
-    plt.clim(-0.5, (n_clus - 0.5))
-    plt.savefig('i/reduce_and_plot_clusters' +
                 str(datetime.now()) + '.png')
     plt.show()
 
@@ -372,20 +480,24 @@ def score_event_cluster(df_label, df_eval, event_cluster):
         # set rates (otherwise undefined)
         try:
             miss = c / (a + c)
+        except:
+            miss = 0.0
+        try:
             f = b / (b + d)
+        except:
+            f = 0.0
+        try:
             r = a / (a + c)
+        except:
+            r = 0.0
+        try:
             p = a / (a + b)
+        except:
+            p = 0.0
+        try:
             f1 = 2 * r * p / (r + p)
         except:
-            a = None
-            b = None
-            c = None
-            d = None
-            miss = None
-            f = None
-            r = None
-            p = None
-            f1 = None
+            f1 = 0.0
 
         df_results.loc[i] = [a, b, c, d, miss, f, r, p, f1]
 
