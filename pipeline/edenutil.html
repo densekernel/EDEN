@@ -1,0 +1,106 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module edenutil</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>edenutil</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/Users/jm/Desktop/py/EDEN/pipeline/edenutil.py">/Users/jm/Desktop/py/EDEN/pipeline/edenutil.py</a></font></td></tr></table>
+    <p><tt>Imports</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="ast.html">ast</a><br>
+<a href="collections.html">collections</a><br>
+<a href="itertools.html">itertools</a><br>
+</td><td width="25%" valign=top><a href="json.html">json</a><br>
+<a href="math.html">math</a><br>
+<a href="numpy.html">numpy</a><br>
+</td><td width="25%" valign=top><a href="operator.html">operator</a><br>
+<a href="pandas.html">pandas</a><br>
+<a href="cPickle.html">cPickle</a><br>
+</td><td width="25%" valign=top><a href="matplotlib.pyplot.html">matplotlib.pyplot</a><br>
+<a href="time.html">time</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="edenutil.html#GAC">GAC</a>
+</font></dt><dt><font face="helvetica, arial"><a href="edenutil.html#GACTemporal">GACTemporal</a>
+</font></dt></dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="GAC">class <strong>GAC</strong></a></font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="GAC-__init__"><strong>__init__</strong></a>(self, b<font color="#909090">=10.0</font>, p<font color="#909090">=0.5</font>, s<font color="#909090">=0.8</font>, t<font color="#909090">=100</font>, re<font color="#909090">=5</font>)</dt></dl>
+
+<dl><dt><a name="GAC-fit"><strong>fit</strong></a>(self, df_story)</dt><dd><tt>#&nbsp;cluster</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="GACTemporal">class <strong>GACTemporal</strong></a></font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="GACTemporal-__init__"><strong>__init__</strong></a>(self, b<font color="#909090">=10.0</font>, p<font color="#909090">=0.5</font>, s<font color="#909090">=0.8</font>, t<font color="#909090">=100</font>, re<font color="#909090">=5</font>)</dt></dl>
+
+<dl><dt><a name="GACTemporal-fit"><strong>fit</strong></a>(self, df_story)</dt><dd><tt>#&nbsp;cluster</tt></dd></dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-algo_select"><strong>algo_select</strong></a>(algo<font color="#909090">='kmeans'</font>, params<font color="#909090">={}</font>)</dt></dl>
+ <dl><dt><a name="-anomaly_detection"><strong>anomaly_detection</strong></a>(fn, df_story, model, threshold)</dt></dl>
+ <dl><dt><a name="-basic_GAC"><strong>basic_GAC</strong></a>(df_story, p, s)</dt></dl>
+ <dl><dt><a name="-build_centroids"><strong>build_centroids</strong></a>(group, cluster_order_dict)</dt></dl>
+ <dl><dt><a name="-cluster_data"><strong>cluster_data</strong></a>(df_story, algo<font color="#909090">='kmeans'</font>, params<font color="#909090">='{}'</font>)</dt></dl>
+ <dl><dt><a name="-construct_clusters"><strong>construct_clusters</strong></a>(df_update, df_story)</dt></dl>
+ <dl><dt><a name="-cross_validate"><strong>cross_validate</strong></a>(fn, df_story, algo<font color="#909090">='kmeans'</font>, params<font color="#909090">='{}'</font>, train<font color="#909090">='35'</font>)</dt></dl>
+ <dl><dt><a name="-evaluate"><strong>evaluate</strong></a>(fn, ids, model)</dt></dl>
+ <dl><dt><a name="-fancy_dendrogram"><strong>fancy_dendrogram</strong></a>(*args, **kwargs)</dt><dd><tt>#&nbsp;plot:&nbsp;Draw&nbsp;a&nbsp;fancy&nbsp;dendrogram<br>
+#&nbsp;https://joernhees.de/blog/2015/08/26/scipy-hierarchical-clustering-and-dendrogram-tutorial/</tt></dd></dl>
+ <dl><dt><a name="-flatten"><strong>flatten</strong></a>(l)</dt></dl>
+ <dl><dt><a name="-get_cluster_order"><strong>get_cluster_order</strong></a>(Z)</dt></dl>
+ <dl><dt><a name="-get_cluster_size"><strong>get_cluster_size</strong></a>(vsm, Z, p, s)</dt></dl>
+ <dl><dt><a name="-get_df_eval"><strong>get_df_eval</strong></a>(fn)</dt></dl>
+ <dl><dt><a name="-get_df_label"><strong>get_df_label</strong></a>(ids, model)</dt></dl>
+ <dl><dt><a name="-get_linkage_matrix"><strong>get_linkage_matrix</strong></a>(vsm)</dt></dl>
+ <dl><dt><a name="-match_event_cluster"><strong>match_event_cluster</strong></a>(df_label, df_eval)</dt></dl>
+ <dl><dt><a name="-mycosine"><strong>mycosine</strong></a>(x1, x2)</dt></dl>
+ <dl><dt><a name="-plot_cluster_counts"><strong>plot_cluster_counts</strong></a>(model, title<font color="#909090">=''</font>)</dt></dl>
+ <dl><dt><a name="-preprocess_data"><strong>preprocess_data</strong></a>(data, method)</dt></dl>
+ <dl><dt><a name="-read_data"><strong>read_data</strong></a>(fn)</dt></dl>
+ <dl><dt><a name="-recon_vsm"><strong>recon_vsm</strong></a>(vsm_series)</dt><dd><tt>#&nbsp;reconsturct&nbsp;vsm:&nbsp;reconstruct&nbsp;np.ndarray&nbsp;from&nbsp;pd.Series</tt></dd></dl>
+ <dl><dt><a name="-reduce_and_plot_clusters"><strong>reduce_and_plot_clusters</strong></a>(X, model, title<font color="#909090">=''</font>, just_labelled<font color="#909090">=False</font>, event_clusters<font color="#909090">=[]</font>)</dt></dl>
+ <dl><dt><a name="-score_event_cluster"><strong>score_event_cluster</strong></a>(df_label, df_eval, event_cluster)</dt></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>stopwords</strong> = &lt;WordListCorpusReader in u'/Users/jm/nltk_data/corpora/stopwords'&gt;</td></tr></table>
+</body></html>

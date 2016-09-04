@@ -8,3 +8,7 @@ models
 pipeline/io
 pipeline/i
 notes
+.gz
+.zip
+runners.txt
+format_code.py
