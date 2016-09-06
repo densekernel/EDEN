@@ -4,6 +4,7 @@ venv
 notebooks/*.json
 notebooks/*.gzip
 notebooks/i
+notebooks/.ipynb_checkpoints
 models
 pipeline/io
 pipeline/i
@@ -11,4 +12,3 @@ notes
 .gz
 .zip
 runners.txt
-format_code.py

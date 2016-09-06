@@ -2,18 +2,35 @@
 
 ## (Anomalous) Event Detection in News
 
-+ Open source code to analyse streams of news articles and detect events. Moreover, to detect anomalous events, those with a story count and (perhaps) change in significant terms representing an outlier based on statistical thresholds.
++ Analyse stream of news articles to find anomalous events
++ NLP modules to represent data
++ Apply Document Clustering algorithms for Event Detection
++ Characterise event-centric clusters and use statistical threshold models for Anomaly Detection
 
 ## Data Pipeline
 
-Built using `luigi`. Currently under construction.
+Implements Python Luigi.
 
-How to run:
+### Documentation
+
+| Task             | Dependencies                  | Parameters                                                                                   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+|------------------|-------------------------------|----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ReadData         | {}                            | {‘fn’ : list}                                                                                | Reads respective data (news articles) from ‘fn’, a list of filenames. Returns a con- catenation of all files.  'fn':  Use a comma-seperated text string (e.g., '1,2,3').                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| PreprocessData   | {ReadData}                    | {‘fn’ : list, ‘method’: string}                                                              | Apply NLP techniques on unstructured data for stop- word removal, lower-casing and porter stemming. Convert to structure data format of Vector Space Model.  Method: Selected by parameter; ‘ltc’: tf-idf on entire content, ‘ltc-ent’: tf-idf on named entities, ‘word2vec’: Use pre-trained Google News vectors                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ClusterData      | {PreprocessData}              | {‘fn’ ‘method’: string, ‘algo’: string, ‘params’: dict}                                      | Run Document Cluster-ing algorithm (selected by‘algo’ with hyperparameters‘params’) on PreprocessedData'algo': Select from {'kmeans', 'dbscan', 'meanshift', 'birch', 'gac', 'gactemporal'} to run the corresponding algorithm'params': Use string representation of Python Dictionary (e.g., '{"n_clusters": 50}')n.b., for choice of parameters of algorithm see corresponding sklearn documentation, with the exception of 'gac' or 'gactemporal' which accept parameters: 'b=10.0, p=0.5, s=0.8, t=100,', b is factor (stopping criteria), s is minimum similarity threshold (stopping criteria), bucket size, p is a reduction 'gac has a parameter 're=5' for number of iterations to perform normally before re-bucketing. |
+| Evaluate         | {PreprocessData, ClusterData} | {‘fn’ : list, ‘method’: string, ‘algo’: string, ‘params’: dict}                              | Evaluate performance of Document Clustering algoirthm using external criterion and labelled data in the style of TDT Pilot Study                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| CrossValidate    | {PreprocessData}              | {‘fn’ : list, ‘method’: string, ‘algo’: string, ‘params’: dict, 'train': list, 'test': list} | Perform grid search across range of hyperaparameters to optimise Document Clus- tering algorithms  train, test: Use a comma-separated value of filenames like 'fn' (e.g. '3,5,6'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| AnomalyDetection |                               |                                                                                              |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+|                  |                               |                                                                                              |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+|                  |                               |                                                                                              |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+ 
+
+### Prompts
 
 - default: `# python eden.py ReadData --local-scheduler`
 - with all files: `python eden.py Evaluate --local-scheduler --fn '35,30,6,33,23,2,1,20,29,40'`
 
-## Application 
+## App
 
 ### Architecture
 
@@ -45,7 +62,7 @@ Installation:
 
 + Run ElasticSearch with Signal 1M-Sample (See Elasticsearch section)
 + `git clone https://github.com/jonathanmanfield/EDEN`
-+ `cd EDEN`
++ `cd EDEN/app`
 + `virtualenv venv`
 + `source ./venv/bin/activate`
 + pip install -r requirements.txt (Needs testing)
