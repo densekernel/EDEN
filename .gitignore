@@ -11,4 +11,5 @@ pipeline/i
 notes
 .gz
 .zip
+notebooks/*.png
 runners.txt
