@@ -139,7 +139,7 @@ class AnomalyDetection(luigi.Task):
     threshold = luigi.Parameter(default='{"tau": "24h", "t": 0, "k": 1.5}')
 
     def requires(self):
-        return [PreprocessData(fn=self.fn, method=self.method), ClusterData(fn=self.fn, method=self.method, algo=self.algo, params=self.params), Evaluate(fn=self.fn, method=self.method, algo=self.algo, params=self.params)]
+        return [PreprocessData(fn=self.fn, method=self.method), ClusterData(fn=self.fn, method=self.method, algo=self.algo, params=self.params)]
 
     def output(self):
         return luigi.LocalTarget(io_dir + "anomaly_detection/anomaly_detection_fn{}_method_{}_algo_{}_params_{}_threshold_{}.txt".format(self.fn, self.method, self.algo, self.params[:30], self.threshold))
