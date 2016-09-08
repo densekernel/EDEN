@@ -27,10 +27,26 @@ Implements Python Luigi.
 
 ### Prompts
 
-- default: `# python eden.py ReadData --local-scheduler`
-- with all files: `python eden.py Evaluate --local-scheduler --fn '35,30,6,33,23,2,1,20,29,40'`
+Each task can be run separately and parameterised. All intermediary files will be saved to `pipeline/io`
 
-## App
+- ReadData: `python eden.py ReadData --local-scheduler --fn '35,30'`
+- PreprocessData: `python eden.py PreprocessData --local-scheduler --fn '35,30' --method 'ltc'
+- ClusterData:
+  - python eden.py ClusterData --local-scheduler --fn '35,30' --method 'ltc' --algo 'kmeans' --params '{"n_clusters": 8}'
+  - python eden.py ClusterData --local-scheduler --fn '35,30' --method 'ltc' --algo 'gac' --params '{"b": 10, "s":0.9, "p":0.9}'
+  - python eden.py ClusterData --local-scheduler --fn '35,30' --method 'ltc' --algo 'gactemporal' --params '{"b": 10, "s":0.9, "p":0.9, "re": 5}'
+- Evaluate:
+  - python eden.py ClusterData --local-scheduler --fn '35,30' --method 'ltc' --algo 'gactemporal' --params '{"b": 10, "s":0.9, "p":0.9, "re": 5}'
+- AnomalyDetection: python eden.py AnomalyDetection --local-scheduler --fn '35,30' --method 'ltc' --algo 'gactemporal' --params '{"b":10, "s": 0.9, "p":0.9, "re":5}'
+
+
+Or the entire pipeline can be run at once
+
+- python eden.py AnomalyDetection --local-scheduler
+
+
+
+## App (Under Construction)
 
 ### Architecture
 
@@ -84,10 +100,9 @@ Access (web application):
 + visit `http://localhost:8000`
 + Test count articles by visiting `http://localhost:8000/#/articles/count`
 
-## Notebooks
+## Notebooks (Coming soon)
 
-+ Signal Notebook (Contains exploratory insights into dataset format and clustering)
-+ GAC (Development of GAC algorithm)
++ Data Visualisation (With dimensionality reduction of article vectors and plot characterisations)
 
 ## Credits
 

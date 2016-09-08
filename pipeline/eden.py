@@ -57,8 +57,8 @@ class ClusterData(luigi.Task):
 
 class Evaluate(luigi.Task):
     fn = luigi.Parameter(default='35')
-    algo = luigi.Parameter(default='kmeans')
     method = luigi.Parameter(default='ltc')
+    algo = luigi.Parameter(default='kmeans')
     params = luigi.Parameter(default='{}')
 
     def requires(self):
@@ -89,7 +89,7 @@ class CrossValidate(luigi.Task):
     test = luigi.Parameter(default='30')
 
     def requires(self):
-        return [PreprocessData(fn=self.train, method=self.method)]
+        return [PreprocessData(fn=self.train, method=self.method), PreprocessData(fn=self.test, method=self.method)]
 
     def output(self):
         return luigi.LocalTarget(io_dir + "crossvalidate/cross_validate_fn_{}_method_{}_algo_{}_params_{}_train_{}_test_{}.txt".format(self.fn, self.method, self.algo, self.params[:30], self.train, self.test))
