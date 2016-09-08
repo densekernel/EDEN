@@ -59,10 +59,13 @@ Each task can be run separately and parameterised. All intermediary files will b
 - `AnomalyDetection: python eden.py AnomalyDetection --local-scheduler --fn '35,30' --method 'ltc' --algo 'gactemporal' --params '{"b":10, "s": 0.9, "p":0.9, "re":5}'`
 
 
-Or the entire pipeline can be run at once
+Or the entire pipeline can be run at once. Of-course it can be parameterised at this stage too.
 
-- python eden.py AnomalyDetection --local-scheduler
+- `python eden.py AnomalyDetection --local-scheduler'
 
+Separately, there exists a cross-validation function to find the best hyperparameters and see how well they generalize to test data.
+
+- `python eden.py CrossValidate --local-scheduler --fn '35,30' --method 'ltc' --algo 'kmeans' --params '{"n_clusters": [5,10,15,20]}' --train '35' --test '30'`
 
 
 ## App (Under Construction)

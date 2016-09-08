@@ -82,8 +82,8 @@ class Evaluate(luigi.Task):
 
 class CrossValidate(luigi.Task):
     fn = luigi.Parameter(default='35,30')
-    algo = luigi.Parameter(default='kmeans')
     method = luigi.Parameter(default='ltc')
+    algo = luigi.Parameter(default='kmeans')
     params = luigi.Parameter(default='{}')
     train = luigi.Parameter(default='35')
     test = luigi.Parameter(default='30')
