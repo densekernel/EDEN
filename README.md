@@ -7,6 +7,25 @@
 + Apply Document Clustering algorithms for Event Detection
 + Characterise event-centric clusters and use statistical threshold models for Anomaly Detection
 
+## Repository Structure
+
+To use this with an existing dataset, we recommend setting up the repostiory in the following way.
+
+    app/
+    datasets/
+      eval/
+        1.txt
+        2.txt
+        ...
+      raw-data/
+        1.json
+        2.json
+        ...
+      word2vec_signal/
+        word2vec_signal.p
+    pipeline/
+      /io/
+
 ## Data Pipeline
 
 Implements Python Luigi.
@@ -30,14 +49,14 @@ Implements Python Luigi.
 Each task can be run separately and parameterised. All intermediary files will be saved to `pipeline/io`
 
 - ReadData: `python eden.py ReadData --local-scheduler --fn '35,30'`
-- PreprocessData: `python eden.py PreprocessData --local-scheduler --fn '35,30' --method 'ltc'
+- PreprocessData: `python eden.py PreprocessData --local-scheduler --fn '35,30' --method 'ltc'`
 - ClusterData:
-  - python eden.py ClusterData --local-scheduler --fn '35,30' --method 'ltc' --algo 'kmeans' --params '{"n_clusters": 8}'
-  - python eden.py ClusterData --local-scheduler --fn '35,30' --method 'ltc' --algo 'gac' --params '{"b": 10, "s":0.9, "p":0.9}'
-  - python eden.py ClusterData --local-scheduler --fn '35,30' --method 'ltc' --algo 'gactemporal' --params '{"b": 10, "s":0.9, "p":0.9, "re": 5}'
+  - `python eden.py ClusterData --local-scheduler --fn '35,30' --method 'ltc' --algo 'kmeans' --params '{"n_clusters": 8}'`
+  - `python eden.py ClusterData --local-scheduler --fn '35,30' --method 'ltc' --algo 'gac' --params '{"b": 10, "s":0.9, "p":0.9}'`
+  - `python eden.py ClusterData --local-scheduler --fn '35,30' --method 'ltc' --algo 'gactemporal' --params '{"b": 10, "s":0.9, "p":0.9, "re": 5}'`
 - Evaluate:
-  - python eden.py ClusterData --local-scheduler --fn '35,30' --method 'ltc' --algo 'gactemporal' --params '{"b": 10, "s":0.9, "p":0.9, "re": 5}'
-- AnomalyDetection: python eden.py AnomalyDetection --local-scheduler --fn '35,30' --method 'ltc' --algo 'gactemporal' --params '{"b":10, "s": 0.9, "p":0.9, "re":5}'
+  - `python eden.py ClusterData --local-scheduler --fn '35,30' --method 'ltc' --algo 'gactemporal' --params '{"b": 10, "s":0.9, "p":0.9, "re": 5}'`
+- `AnomalyDetection: python eden.py AnomalyDetection --local-scheduler --fn '35,30' --method 'ltc' --algo 'gactemporal' --params '{"b":10, "s": 0.9, "p":0.9, "re":5}'`
 
 
 Or the entire pipeline can be run at once

@@ -6,7 +6,7 @@ notebooks/*.gzip
 notebooks/i
 notebooks/.ipynb_checkpoints
 models
-pipeline/io
+pipeline/io/*
 pipeline/i
 notes
 .gz
