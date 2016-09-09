@@ -7,7 +7,7 @@
 + Apply Document Clustering algorithms for Event Detection
 + Characterise event-centric clusters and use statistical threshold models for Anomaly Detection
 
-## Repository Structure
+## Installation
 
 To use this with an existing dataset, we recommend setting up the repostiory in the following way.
 
@@ -25,6 +25,12 @@ To use this with an existing dataset, we recommend setting up the repostiory in 
         word2vec_signal.p
     pipeline/
       /io/
+
+Part of this structure will be set up during the process of cloning.
+
+- `git clone https://github.com/jonathanmanfield/EDEN`
+- `cd EDEN`
+- `cp path/to/datasets .`
 
 ## Data Pipeline
 
@@ -57,7 +63,9 @@ Each task can be run separately and parameterised. All intermediary files will b
 
 Or the entire pipeline can be run at once. Of-course it can be parameterised at this stage too.
 
-- `python eden.py AnomalyDetection --local-scheduler'
+- `python eden.py Evaluate --local-scheduler`
+- `python eden.py AnomalyDetection --local-scheduler`
+- `python eden.py CrossValidation --local-scheduler`
 
 Separately, there exists a cross-validation function to find the best hyperparameters and see how well they generalize to test data.
 

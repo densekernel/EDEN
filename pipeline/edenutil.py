@@ -106,7 +106,7 @@ def preprocess_data(data, method):
     df_story = df_story.reset_index()
 
     if method == 'ltc':
-        vect = TfidfVectorizer(use_idf=True, norm='l2', sublinear_tf=True)
+        vect = TfidfVectorizer(sublinear_tf=True, use_idf=True, norm='l2')
         vsm = vect.fit_transform(df_story['content_prepro'].values)
         vsm_arr = vsm.toarray()
         print "[EDEN I/O -- preprocess_data] VSM shape: ", vsm.shape
