@@ -36,6 +36,11 @@ Part of this structure will be set up during the process of cloning.
 
 Implements Python Luigi.
 
+### Requirements 
+
+TODO list all the librariesx
+
+
 ### Documentation
 
 | Task             | Dependencies                  | Parameters                                                                                   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
@@ -49,6 +54,7 @@ Implements Python Luigi.
 ### Prompts
 
 Each task can be run separately and parameterised. All intermediary files will be saved to `pipeline/io`
+Please note that all the source python files are located in 'pipeline', i.e. you need to `cd pipeline`
 
 - ReadData: `python eden.py ReadData --local-scheduler --fn '35,30'`
 - PreprocessData: `python eden.py PreprocessData --local-scheduler --fn '35,30' --method 'ltc'`
@@ -57,7 +63,7 @@ Each task can be run separately and parameterised. All intermediary files will b
   - `python eden.py ClusterData --local-scheduler --fn '35,30' --method 'ltc' --algo 'gac' --params '{"b": 10, "s":0.9, "p":0.9}'`
   - `python eden.py ClusterData --local-scheduler --fn '35,30' --method 'ltc' --algo 'gactemporal' --params '{"b": 10, "s":0.9, "p":0.9, "re": 5}'`
 - Evaluate:
-  - `python eden.py ClusterData --local-scheduler --fn '35,30' --method 'ltc' --algo 'gactemporal' --params '{"b": 10, "s":0.9, "p":0.9, "re": 5}'`
+  - `python eden.py Evaluate --local-scheduler --fn '35,30' --method 'ltc' --algo 'gactemporal' --params '{"b": 10, "s":0.9, "p":0.9, "re": 5}'`
 - `AnomalyDetection: python eden.py AnomalyDetection --local-scheduler --fn '35,30' --method 'ltc' --algo 'gactemporal' --params '{"b":10, "s": 0.9, "p":0.9, "re":5}'`
 
 
